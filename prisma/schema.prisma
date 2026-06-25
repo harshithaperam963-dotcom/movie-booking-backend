@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  bookings     Booking[]
+  reservations Reservation[]
+}
+
+model Theatre {
+  id      String   @id @default(uuid())
+  name    String
+  city    String
+  screens Screen[]
+}
+
+model Screen {
+  id        String  @id @default(uuid())
+  name      String
+  theatreId String
+  theatre   Theatre @relation(fields: [theatreId], references: [id])
+  seats     Seat[]
+  shows     Show[]
+}
+
+model Seat {
+  id               String           @id @default(uuid())
+  seatNumber       String
+  screenId         String
+  rowNumber        String
+  reservationSeats ReservationSeat?
+  screen           Screen           @relation(fields: [screenId], references: [id])
+}
+
+model Show {
+  id           String        @id @default(uuid())
+  movieId      String
+  startTime    DateTime
+  screenId     String
+  bookings     Booking[]
+  reservations Reservation[]
+  screen       Screen        @relation(fields: [screenId], references: [id])
+}
+
+model Reservation {
+  id        String            @id @default(uuid())
+  userId    String
+  showId    String
+  status    String            @default("ACTIVE")
+  expiresAt DateTime
+  createdAt DateTime          @default(now())
+  show      Show              @relation(fields: [showId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+  seats     ReservationSeat[]
+}
+
+model ReservationSeat {
+  id            String      @id @default(uuid())
+  reservationId String
+  seatId        String      @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  seat          Seat        @relation(fields: [seatId], references: [id])
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  userId    String
+  showId    String
+  amount    Float
+  createdAt DateTime @default(now())
+  show      Show     @relation(fields: [showId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
