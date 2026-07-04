@@ -41,10 +41,11 @@ export const movieDetails = async (
   res: Response
 ) => {
   try {
-    const { imdbID } = req.params;
+    const imdbID =
+  req.params.imdbID as string;
 
-    const movie =
-      await getMovieById(imdbID);
+const movie =
+  await getMovieById(imdbID);
 
     res.json(movie);
   } catch (error) {
